@@ -1,0 +1,56 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+import time
+import requests
+from bs4 import BeautifulSoup
+
+url = 'https://g1.globo.com/busca/?q=intelig%C3%AAncia+artitificial'
+
+option = Options() 
+option.headless = True 
+
+driver = webdriver.Chrome('C:/Users/User/Downloads/driver/chromedriver', options=option)
+driver.get(url)
+
+driver.execute_script("window.scrollTo(0, document.body.scrollHeight);") 
+time.sleep(10)
+
+element = driver.find_element_by_id("content") 
+html = element.get_attribute('outerHTML') 
+print(element)
+html = element.get_attribute('outerHTML')
+driver.quit()  
+
+soup = BeautifulSoup(html, 'lxml') 
+
+texto = []
+
+for bloco in soup.find_all(class_='widget--info__text-container'):
+    #print(bloco)
+    for href in bloco.find_all('a'): 
+        titulo = href.find(class_='widget--info__title product-color')
+        if(titulo != None): 
+            print('titulo',titulo.text[7:-2]) 
+            texto.append(titulo.text[7:-2]) 
+        resumo = href.find(class_='widget--info__description')
+        if(resumo != None):
+            texto.append(resumo.text) 
+            
+texto = ' '.join(texto) 
+print(texto)
+
+## Custom tokenizer ##
+
+pip install nltk
+import nltk
+from nltk.tokenize import RegexpTokenizer #Regular Expression
+ 
+tokenizer = RegexpTokenizer(r'[a-zA-Z]\w+') 
+tokens = tokenizer.tokenize(texto)
+ 
+stopwords = nltk.corpus.stopwords.words() + ['inteligência'] + ['artificial']
+
+nova_lista = [token.lower() for token in tokens if token.lower() not in stopwords]
+ 
+frequencia = nltk.FreqDist(nova_lista)
+(frequencia.most_common(20))
